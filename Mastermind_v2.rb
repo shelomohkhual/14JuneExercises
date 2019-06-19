@@ -1,7 +1,7 @@
 require 'colorize'
 require 'byebug'
 class Board
-    attr_accessor :game_board, :current_row ,:available_colors
+    attr_accessor :game_board, :current_row ,:available_colors,:result
     attr_reader :check_colors
     def initialize
         @available_colors = ["Gr".green,"Re".red,"Ye".yellow,"Bl".blue,"Mg".magenta,"Cy".cyan,"Wh".white,"Bk".black]
@@ -12,8 +12,11 @@ class Board
             [1,2,3,4],
             [1,2,3,4]]
             # byebug
-        @current_row = [1,2,3,4]
+        @current_row = current_row
+        # byebug
+        @result=[]
     end
+    
     
     def show_board
         puts "         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".yellow
@@ -27,8 +30,14 @@ class Board
             row.each do |inside_row|
                 print "#{inside_row}" + "   |   ".yellow
             end
+            # byebug
+            # if self.filled_row? 
             puts
-            # puts Game.check
+                joined=self.result[index]
+                print "ROW:#{index+1}=> #{joined.to_s}"
+                puts
+            # else nil
+            # end
         end
         puts
         print "Available Colors: ".yellow,"Gr,".green,"Re,".red,"Ye,".yellow,"Bl,".blue,"Mg,".magenta,"Cy,".cyan,"Wh,".white,"Bk,".black
@@ -93,42 +102,49 @@ class Board
 end
     #================== CLASS - GAME ================
 class Game
-    attr_accessor :secret_code, :board,:check
+    attr_accessor :secret_code, :board
     attr_reader :guess_chances, :code_length
     def initialize
         @board = Board.new
         @guess_chances = 10
         @secret_code = secret_code
         @code_length = 4
-        @check = check
+        
     end
-    
-
-    def generate_secret_code
-        shuffle=self.board.available_colors.shuffle
-        self.secret_code = shuffle[0,code_length]
-    end
-    def won?
-        self.board.current_row == self.secret_code
-    end
+    # def oer
     def check
-        self.check=[]
+        result=[]
         # byebug
         self.board.current_row.each_with_index do |color,position|
             self.secret_code.each_with_index do|sc_color,sc_position|
                 if sc_color==color && sc_position==position
-                    self.check.push "*"
+                    result.push ("*")
                 elsif sc_color.include? color
-                    self.check.push "o"
+                    result.push ("o")
                 end
             end
         end
+        
+            self.board.result<<result
+        
         # match_color=self.board.current_row & self.board.available_colors
         # # #show correct colors , and perfect spots
         # self.check.push "o" * match_color.size
         # # if blah blah blah
         # self.check.pushs
+        end
+
+    def generate_secret_code
+        shuffled=self.board.available_colors.shuffle
+        # byebug
+        # shuffled=shuffled[0,4]
+        
+        self.secret_code = shuffled[0,code_length]
     end
+    def won?
+        self.board.current_row == self.secret_code
+    end
+    
     
     def play_game
         self.generate_secret_code
